@@ -989,10 +989,146 @@
   transform: translateY(0);
 }
 
+/* 快捷键弹窗样式 */
+.shortcuts-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.shortcuts-modal {
+  width: 520px;
+  max-height: 80vh;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+.shortcuts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(to bottom, #374151, #1f2937);
+  border-bottom: 1px solid #374151;
+}
+
+.shortcuts-header h3 {
+  margin: 0;
+  color: #f3f4f6;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.shortcuts-content {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.shortcut-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background-color 0.15s;
+}
+
+.shortcut-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.shortcut-item kbd {
+  background: rgba(100, 116, 139, 0.3);
+  color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  white-space: nowrap;
+  min-width: 40px;
+  text-align: center;
+}
+
+.shortcut-item span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.shortcuts-footer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.shortcuts-footer .hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.shortcuts-footer .hint kbd {
+  background: rgba(100, 116, 139, 0.3);
+  color: #94a3b8;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+/* 快捷键弹窗滚动条 */
+.shortcuts-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shortcuts-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shortcuts-content::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+.shortcuts-content::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
 /* 响应式调整 */
 @media (max-width: 768px) {
   .chat-sidebar {
     width: 280px;
     right: -280px;
   }
+
+  .shortcuts-modal {
+    width: 90vw;
+  }
 }
+
+

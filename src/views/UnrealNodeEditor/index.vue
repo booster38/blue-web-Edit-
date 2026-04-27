@@ -168,7 +168,90 @@
         </svg>
         AI
       </button>
+      <button class="tool-button" @click="showShortcuts = true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+          <line x1="6" y1="8" x2="6" y2="8"></line>
+          <line x1="10" y1="8" x2="10" y2="8"></line>
+          <line x1="14" y1="8" x2="14" y2="8"></line>
+          <line x1="18" y1="8" x2="18" y2="8"></line>
+          <line x1="6" y1="12" x2="6" y2="12"></line>
+          <line x1="10" y1="12" x2="10" y2="12"></line>
+          <line x1="14" y1="12" x2="14" y2="12"></line>
+          <line x1="18" y1="12" x2="18" y2="12"></line>
+          <line x1="6" y1="16" x2="6" y2="16"></line>
+          <line x1="10" y1="16" x2="10" y2="16"></line>
+          <line x1="14" y1="16" x2="14" y2="16"></line>
+          <line x1="18" y1="16" x2="18" y2="16"></line>
+        </svg>
+        快捷键
+      </button>
     </div>
+
+    <!-- 快捷键弹窗 -->
+    <Teleport to="body">
+      <div v-if="showShortcuts" class="shortcuts-overlay" @click.self="showShortcuts = false">
+        <div class="shortcuts-modal">
+          <div class="shortcuts-header">
+            <h3>⌨️ 快捷键列表</h3>
+            <button class="close-button" @click="showShortcuts = false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="shortcuts-content">
+            <div class="shortcut-group">
+              <div class="shortcut-item">
+                <kbd>Space</kbd>
+                <span>打开搜索菜单，快速创建节点</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Ctrl</kbd> + <kbd>拖拽</kbd>
+                <span>框选多个节点</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Shift</kbd> + <kbd>点击</kbd>
+                <span>点选/取消选择多个节点</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Alt</kbd> + <kbd>拖拽</kbd>
+                <span>剪刀工具 - 划线批量断开连接</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>滚轮</kbd>
+                <span>缩放画布</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>鼠标拖拽</kbd>
+                <span>平移画布</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>右键</kbd>
+                <span>打开节点右键菜单（删除节点）</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>拖拽节点</kbd>
+                <span>移动节点位置</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>拖拽右下角</kbd>
+                <span>调整节点大小</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>拖拽端口</kbd>
+                <span>连接/断开节点之间的数据流</span>
+              </div>
+            </div>
+          </div>
+          <div class="shortcuts-footer">
+            <span class="hint">点击空白处或 <kbd>ESC</kbd> 关闭</span>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
 
     <!-- 对话侧边栏按钮 -->
     <button class="chat-sidebar-toggle" @click="toggleChatSidebar">
@@ -328,6 +411,10 @@ const nodeListSidebarOpen = ref(false);
 // 对话相关状态
 const chatInput = ref('');
 const chatMessagesRef = ref<HTMLElement | null>(null);
+
+// 快捷键弹窗状态
+const showShortcuts = ref(false);
+
 
 // 切换对话侧边栏
 const toggleChatSidebar = () => {
