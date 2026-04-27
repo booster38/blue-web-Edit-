@@ -75,9 +75,9 @@ export function useAIServices(nodeOps?: NodeOperations): AIServices {
 
   // DeepSeek API 配置
   const API_CONFIG = {
-    baseUrl: 'https://api.deepseek.com',
-    apiKey: 'sk-1acdc57096d942779a7c2331d26d7cb5',
-    model: 'deepseek-chat'
+    baseUrl: import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+    apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || '',
+    model: import.meta.env.VITE_DEEPSEEK_MODEL || 'deepseek-chat'
   };
 
   // 发送聊天消息
