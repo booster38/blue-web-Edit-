@@ -307,15 +307,30 @@
     <div class="chat-sidebar" :class="{ 'open': chatSidebarOpen }">
       <div class="chat-sidebar-header">
         <h3>对话</h3>
-        <button class="close-button" @click="toggleChatSidebar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <div class="chat-sidebar-header-actions">
+          <button class="settings-button" @click="showAISettings = true" title="API 设置">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          <button class="close-button" @click="toggleChatSidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="chat-sidebar-content">
         <div class="chat-messages" ref="chatMessagesRef">
+          <!-- 未配置 API Key 时的提示 -->
+          <div v-if="!aiServices.isConfigValid() && aiServices.chatMessages.value.length === 0" class="chat-message bot config-hint">
+            <div class="message-content">
+              <p>🔑 请先配置 AI API 参数</p>
+              <p class="config-hint-text">点击右上角的 ⚙️ 设置按钮，填写 API URL、Key 和模型信息后即可开始对话。</p>
+            </div>
+          </div>
           <div v-for="(message, index) in aiServices.chatMessages.value" :key="index" :class="['chat-message', message.role]">
             <div class="message-content">
               <p>{{ message.content }}</p>
@@ -335,14 +350,14 @@
           <input 
             v-model="chatInput" 
             type="text" 
-            placeholder="输入消息..." 
+            :placeholder="aiServices.isConfigValid() ? '输入消息...' : '请先配置 API 设置'" 
             class="chat-input"
             @keyup.enter="sendMessage"
           />
           <button 
             class="send-button" 
             @click="sendMessage"
-            :disabled="aiServices.isLoading.value || !chatInput.trim()"
+            :disabled="aiServices.isLoading.value || !chatInput.trim() || !aiServices.isConfigValid()"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -352,6 +367,58 @@
         </div>
       </div>
     </div>
+
+    <!-- AI 设置弹窗 -->
+    <Teleport to="body">
+      <div v-if="showAISettings" class="shortcuts-overlay" @click.self="showAISettings = false">
+        <div class="shortcuts-modal ai-settings-modal">
+          <div class="shortcuts-header">
+            <h3>⚙️ AI API 设置</h3>
+            <button class="close-button" @click="showAISettings = false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="shortcuts-content">
+            <div class="settings-form">
+              <div class="settings-field">
+                <label class="settings-label">API URL</label>
+                <input
+                  type="text"
+                  v-model="aiSettings.baseUrl"
+                  placeholder="https://api.deepseek.com"
+                  class="settings-input"
+                />
+              </div>
+              <div class="settings-field">
+                <label class="settings-label">API Key</label>
+                <input
+                  type="password"
+                  v-model="aiSettings.apiKey"
+                  placeholder="输入你的 API Key"
+                  class="settings-input"
+                />
+              </div>
+              <div class="settings-field">
+                <label class="settings-label">模型</label>
+                <input
+                  type="text"
+                  v-model="aiSettings.model"
+                  placeholder="deepseek-chat"
+                  class="settings-input"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="shortcuts-footer">
+            <button class="settings-save-btn" @click="saveAISettings">保存设置</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </div>
 </template>
 
@@ -415,8 +482,26 @@ const chatMessagesRef = ref<HTMLElement | null>(null);
 // 快捷键弹窗状态
 const showShortcuts = ref(false);
 
+// AI 设置弹窗状态
+const showAISettings = ref(false);
+const aiSettings = ref({
+  baseUrl: aiServices.apiConfig.value.baseUrl,
+  apiKey: aiServices.apiConfig.value.apiKey,
+  model: aiServices.apiConfig.value.model
+});
+
+// 保存 AI 设置
+const saveAISettings = () => {
+  aiServices.updateApiConfig({
+    baseUrl: aiSettings.value.baseUrl,
+    apiKey: aiSettings.value.apiKey,
+    model: aiSettings.value.model
+  });
+  showAISettings.value = false;
+};
 
 // 切换对话侧边栏
+
 const toggleChatSidebar = () => {
   chatSidebarOpen.value = !chatSidebarOpen.value;
 };

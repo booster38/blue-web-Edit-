@@ -1101,8 +1101,124 @@
   border: 1px solid rgba(100, 116, 139, 0.3);
 }
 
+/* AI 设置弹窗样式 */
+.ai-settings-modal {
+  width: 460px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-input {
+  padding: 10px 12px;
+  background-color: #111827;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  color: #f3f4f6;
+  font-size: 14px;
+  transition: border-color 0.15s;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.settings-input::placeholder {
+  color: #4b5563;
+}
+
+.settings-save-btn {
+  padding: 10px 32px;
+  background: linear-gradient(to bottom, #3b82f6, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.settings-save-btn:hover {
+  background: linear-gradient(to bottom, #60a5fa, #3b82f6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.settings-save-btn:active {
+  transform: translateY(0);
+}
+
+/* 对话侧边栏头部操作按钮 */
+.chat-sidebar-header-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.settings-button {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.settings-button:hover {
+  background-color: #374151;
+  color: #3b82f6;
+}
+
+/* 配置提示样式 */
+.config-hint {
+  background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px !important;
+  padding: 16px 20px !important;
+  max-width: 90% !important;
+}
+
+.config-hint .message-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.config-hint .config-hint-text {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+  color: #64748b !important;
+  line-height: 1.5;
+}
+
 /* 快捷键弹窗滚动条 */
 .shortcuts-content::-webkit-scrollbar {
+
   width: 6px;
 }
 

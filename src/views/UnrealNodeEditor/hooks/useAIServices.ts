@@ -56,7 +56,13 @@ export interface AIServices {
   // 状态管理
   isLoading: Ref<boolean>;
   error: Ref<string | null>;
+
+  // API 配置管理
+  apiConfig: Ref<{ baseUrl: string; apiKey: string; model: string }>;
+  updateApiConfig: (config: { baseUrl?: string; apiKey?: string; model?: string }) => void;
+  isConfigValid: () => boolean;
 }
+
 
 export interface NodeOperations {
   nodes: Ref<Node[]>;
@@ -68,17 +74,58 @@ export interface NodeOperations {
   view: Ref<any>;
 }
 
+// localStorage 存储键名
+const STORAGE_KEY = 'blue-web-ai-config';
+
+// 从 localStorage 读取保存的配置
+function loadSavedConfig(): { baseUrl: string; apiKey: string; model: string } | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // 忽略解析错误
+  }
+  return null;
+}
+
+// 保存配置到 localStorage
+function saveConfigToStorage(config: { baseUrl: string; apiKey: string; model: string }) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch {
+    // 忽略存储错误
+  }
+}
+
 export function useAIServices(nodeOps?: NodeOperations): AIServices {
   const chatMessages = ref<ChatMessage[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
-  // DeepSeek API 配置
-  const API_CONFIG = {
-    baseUrl: import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
-    apiKey: import.meta.env.VITE_DEEPSEEK_API_KEY || '',
-    model: import.meta.env.VITE_DEEPSEEK_MODEL || 'deepseek-chat'
+  // 优先从 localStorage 读取用户保存的配置，其次从 .env 环境变量读取
+  const savedConfig = loadSavedConfig();
+  const apiConfig = ref({
+    baseUrl: savedConfig?.baseUrl || import.meta.env.VITE_DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+    apiKey: savedConfig?.apiKey || import.meta.env.VITE_DEEPSEEK_API_KEY || '',
+    model: savedConfig?.model || import.meta.env.VITE_DEEPSEEK_MODEL || 'deepseek-chat'
+  });
+
+  // 更新 API 配置（同时持久化到 localStorage）
+  const updateApiConfig = (config: { baseUrl?: string; apiKey?: string; model?: string }) => {
+    if (config.baseUrl !== undefined) apiConfig.value.baseUrl = config.baseUrl;
+    if (config.apiKey !== undefined) apiConfig.value.apiKey = config.apiKey;
+    if (config.model !== undefined) apiConfig.value.model = config.model;
+    // 保存到 localStorage
+    saveConfigToStorage({ ...apiConfig.value });
   };
+
+  // 检查配置是否有效
+  const isConfigValid = (): boolean => {
+    return apiConfig.value.apiKey.trim() !== '';
+  };
+
 
   // 发送聊天消息
   const sendChatMessage = async (message: string, history: ChatMessage[] = [], currentNodes: Node[] = []): Promise<string> => {
@@ -103,7 +150,7 @@ export function useAIServices(nodeOps?: NodeOperations): AIServices {
       const systemPrompt = "你是一个节点图编辑器的助手，你可以帮助用户创建和管理节点。\n\n你可以使用以下工具函数来完成任务：\n\n1. **createNode(type, options?)** - 创建单个节点\n   - type: 'text', 'http', 'js', 'input-image', 'gen-image', 'preview'\n   - options: {x, y, text, url, method, code, prompt, headers, body}\n\n2. **createMultipleNodes(nodesConfig)** - 创建多个节点\n   - nodesConfig: [{type, options}, ...]\n\n3. **connectNodes(fromNodeId, toNodeId)** - 连接两个节点\n\n4. **createNodeChain(chainConfig)** - 创建节点链（自动连接）\n   - chainConfig: [{type, options}, ...]\n\n5. **clearAllNodes()** - 清空所有节点\n\n6. **getCurrentNodes()** - 获取当前所有节点信息\n\n使用示例：\n\`\`\`javascript\n// 创建文本节点\nconst node = await createNode('text', { text: 'Hello World' });\n\n// 创建节点链\nconst nodes = await createNodeChain([\n  {type: 'text', options: {text: 'Hello World'}},\n  {type: 'js', options: {code: 'function process(input) { return input.toUpperCase(); }'}},\n  {type: 'preview', options: {}}\n]);\n\`\`\`\n\n节点创建规则：\n- 节点默认会在用户当前视口内创建\n- 多个节点会自动水平排列，间距约200px\n- 你可以通过getCurrentNodes()了解当前画布状态\n\n当用户请求涉及节点操作时，你应该调用相应的工具函数来完成任务，然后告诉用户操作结果。\n\n如果用户的请求不需要节点操作，你应该正常回答用户的问题。" + currentNodesInfo;
 
       const requestBody = {
-        model: API_CONFIG.model,
+        model: apiConfig.value.model,
         messages: [
           { role: 'system', content: systemPrompt },
           ...history,
@@ -112,11 +159,11 @@ export function useAIServices(nodeOps?: NodeOperations): AIServices {
         stream: false
       };
 
-      const response = await fetch(`${API_CONFIG.baseUrl}/chat/completions`, {
+      const response = await fetch(`${apiConfig.value.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_CONFIG.apiKey}`
+          'Authorization': `Bearer ${apiConfig.value.apiKey}`
         },
         body: JSON.stringify(requestBody)
       });
@@ -136,6 +183,7 @@ export function useAIServices(nodeOps?: NodeOperations): AIServices {
       isLoading.value = false;
     }
   };
+
 
   // 添加消息到历史记录
   const addMessage = (role: 'user' | 'assistant' | 'system', content: string) => {
@@ -443,6 +491,10 @@ export function useAIServices(nodeOps?: NodeOperations): AIServices {
     createNodeFromDescription,
     generateNodeChain,
     isLoading,
-    error
+    error,
+    apiConfig,
+    updateApiConfig,
+    isConfigValid
   };
+
 }
